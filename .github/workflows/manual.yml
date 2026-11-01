@@ -1,6 +1,6 @@
 
-
-  name: Manual workflow
+          
+name: Manual workflow
 
 on:
   workflow_dispatch:
@@ -29,4 +29,3 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python upload.py
-          
