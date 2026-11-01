@@ -1,31 +1,44 @@
 
-name: Manual workflow
+              
+import os
+from flask import Flask, jsonify, request
+import openai
+import urllib.parse
 
-on:
-  workflow_dispatch:
+app = Flask(__name__)
 
-jobs:
-  upload-video:
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout repository
-            uses: actions/checkout@v4
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
-          - name: Set up Python
-            uses: actions/setup-python@v5
-            with:
-              python-version: '3.10'
+@app.route('/')
+def home():
+    return "ZZ LIGHTING COMPANY Complete YouTube Automation Bot is Active!"
 
-          - name: Install dependencies
-            run: |
-              python -m pip install --upgrade pip
-              pip install google-auth-oauthlib google-auth-httplib2 google-api-python-client requests flask openai
+@app.route('/run-complete-automation', methods=['POST'])
+def run_automation():
+    try:
+        # Step 1: ChatGPT se script generate karwana
+        response = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are the official content creator for ZZ LIGHTING COMPANY."
+                },
+                {
+                    "role": "user",
+                    "content": "Create a catchy YouTube Short title and a 30-second script about LED lighting."
+                }
+            ]
+        )
+        ai_output = response.choices[0].message.content
+        
+        return jsonify({
+            "status": "success",
+            "brand": "ZZ LIGHTING COMPANY",
+            "generated_script": ai_output
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-          - name: Run YouTube Upload Script
-            env:
-              CLIENT_ID: ${{ secrets.CLIENT_ID }}
-              CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-              OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-            run: |
-              python upload.py
-
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
