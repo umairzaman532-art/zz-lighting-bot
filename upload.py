@@ -1,3 +1,4 @@
+
 import os
 import google.generativeai as genai
 from googleapiclient.discovery import build
@@ -31,11 +32,9 @@ def generate_lighting_script():
 def create_video_from_script(script_text):
     print("Creating video from script...")
     
-    # ایک سادہ تصویر بنانا جس پر زیڈ زی लाइٹنگ لکھا ہو
     img = Image.new('RGB', (1080, 1920), color=(15, 15, 30))
     d = ImageDraw.Draw(img)
     
-    # ٹیکسٹ کو تصاویر پر سیٹ کرنا (پہلے چند جملے)
     lines = script_text.split('\n')
     text_to_show = "\n".join([line for line in lines if line.strip()][:5])
     
@@ -45,7 +44,6 @@ def create_video_from_script(script_text):
     image_path = "temp_slide.png"
     img.save(image_path)
     
-    # تصویر کو ویڈیو میں بدلنے کے لیے کمانڈ (FFmpeg کے ذریعے)
     video_path = "output_video.mp4"
     cmd = [
         "ffmpeg", "-loop", "1", "-i", image_path, 
@@ -59,54 +57,55 @@ def create_video_from_script(script_text):
 
 # 3. YouTube Upload سیٹ اپ
 def upload_to_youtube(video_file_path, title, description):
-    client_id = os.getenv("YOUTUBE_CLIENT_ID")
-    client_secret = os.getenv("YOUTUBE_CLIENT_SECRET")
-    refresh_token = os.getenv("YOUTUBE_REFRESH_TOKEN")
+    try:
+        client_id = os.getenv("YOUTUBE_CLIENT_ID")
+        client_secret = os.getenv("YOUTUBE_CLIENT_SECRET")
+        refresh_token = os.getenv("YOUTUBE_REFRESH_TOKEN")
 
-    creds = Credentials(
-        None,
-        refresh_token=refresh_token,
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=client_id,
-        client_secret=client_secret
-    )
+        creds = Credentials(
+            None,
+            refresh_token=refresh_token,
+            token_uri="https://oauth2.googleapis.com/token",
+            client_id=client_id,
+            client_secret=client_secret
+        )
 
-    youtube = build("youtube", "v3", credentials=creds)
+        youtube = build("youtube", "v3", credentials=creds)
 
-    body = {
-        "snippet": {
-            "title": title,
-            "description": description,
-            "tags": ["ZZ Lighting", "LED Lights", "Modern Ceiling Lights"],
-            "categoryId": "28"
-        },
-        "status": {
-            "privacyStatus": "public"
+        body = {
+            "snippet": {
+                "title": title,
+                "description": description,
+                "tags": ["ZZ Lighting", "LED Lights", "Modern Ceiling Lights"],
+                "categoryId": "28"
+            },
+            "status": {
+                "privacyStatus": "public"
+            }
         }
-    }
 
-    media = MediaFileUpload(video_file_path, chunksize=-1, resumable=True)
-    request = youtube.videos().insert(
-        part="snippet,status",
-        body=body,
-        media_body=media
-    )
+        media = MediaFileUpload(video_file_path, chunksize=-1, resumable=True)
+        request = youtube.videos().insert(
+            part="snippet,status",
+            body=body,
+            media_body=media
+        )
 
-    response = None
-    while response is None:
-        status, response = request.next_chunk()
-        if status:
-            print(f"Uploaded {int(status.progress() * 100)}%.")
-    
-    print("Video uploaded successfully!")
+        response = None
+        while response is None:
+            status, response = request.next_chunk()
+            if status:
+                print(f"Uploaded {int(status.progress() * 100)}%.")
+        
+        print("Video uploaded successfully!")
+    except Exception as e:
+        print(f"YouTube Upload Error: {e}")
+        raise e
 
 if __name__ == "__main__":
     print("Generating script with Gemini...")
     script_text = generate_lighting_script()
     print("Generated Script:\n", script_text)
     
-    # ویڈیو بنانا
     video_file = create_video_from_script(script_text)
-    
-    # یوٹیوب پر خودکار اپ لوڈ کرنا
     upload_to_youtube(video_file, "ZZ Lighting Company - Modern LED Lights", script_text)
