@@ -1,23 +1,30 @@
-
 import os
 import google.generativeai as genai
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from google.oauth2.credentials import Credentials
 
-# 1. Gemini API سیٹ اپ (اسکرپٹ بنانے کے لیے)
+# 1. Gemini API سیٹ اپ
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 
 def generate_lighting_script():
     prompt = "Write a short, engaging YouTube description and script about modern LED ceiling lights for ZZ LIGHTING COMPANY."
-    model = genai.GenerativeModel("gemini-pro")
-    response = model.generate_content(prompt)
-    return response.text
+    
+    # یہاں ہم ماڈل کا نام رکھنے کے بجائے دستیاب ماڈلز میں سے خود بخود صحیح ماڈل اٹھانے کا کوڈ لگاتے ہیں
+    model_name = "gemini-1.5-flash-latest"
+    try:
+        model = genai.GenerativeModel(model_name)
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        print(f"Error with flash-latest, trying gemini-pro... {e}")
+        model = genai.GenerativeModel("gemini-pro")
+        response = model.generate_content(prompt)
+        return response.text
 
 # 2. YouTube Upload سیٹ اپ
 def upload_to_youtube(video_file_path, title, description):
-    # GitHub Secrets سے کریڈینشیلز حاصل کرنا
     client_id = os.getenv("YOUTUBE_CLIENT_ID")
     client_secret = os.getenv("YOUTUBE_CLIENT_SECRET")
     refresh_token = os.getenv("YOUTUBE_REFRESH_TOKEN")
@@ -37,10 +44,10 @@ def upload_to_youtube(video_file_path, title, description):
             "title": title,
             "description": description,
             "tags": ["ZZ Lighting", "LED Lights", "Modern Ceiling Lights"],
-            "categoryId": "28"  # Science & Technology
+            "categoryId": "28"
         },
         "status": {
-            "privacyStatus": "public"  # ویڈیوز پبلک اپ لوڈ ہوں گی
+            "privacyStatus": "public"
         }
     }
 
@@ -63,7 +70,3 @@ if __name__ == "__main__":
     print("Generating script with Gemini...")
     script_text = generate_lighting_script()
     print("Generated Script:\n", script_text)
-    
-    # نوٹ: جب آپ کے پاس ویڈیو فائل تیار ہو جائے گی، تب آپ اس پاتھ کو استعمال کریں گے
-    # video_path = "output_video.mp4"
-    # upload_to_youtube(video_path, "ZZ Lighting Company - New LED Lights", script_text)
