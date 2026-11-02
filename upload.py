@@ -1,3 +1,4 @@
+
 import os
 import google.generativeai as genai
 
@@ -6,7 +7,7 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 print("Generating script using Gemini...")
 
-# Initialize the updated model
+# Initialize the correct supported model
 model = genai.GenerativeModel('gemini-2.5-flash')
 
 # Generate content
