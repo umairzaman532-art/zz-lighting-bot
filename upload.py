@@ -1,17 +1,31 @@
+name: ZZ Lighting Auto Bot
 
-import os
-import google.generativeai as genai
+on:
+  workflow_dispatch:  # آپ جب چاہیں ہاتھ سے بھی چلا سکتے ہیں
+  schedule:
+    - cron: '0 8 * * *'   # پاکستانی وقت کے مطابق روزانہ دوپہر 1:00 بجے
+    - cron: '0 14 * * *'  # پاکستانی وقت کے مطابق روزانہ شام 7:00 بجے
 
-# Configure Gemini API key
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+jobs:
+  upload-video:
+    runs-on: ubuntu-latest
 
-print("Generating script using Gemini...")
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-# Initialize the model
-model = genai.GenerativeModel('gemini-3.8-flash')
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
 
-# Generate content
-response = model.generate_content("Write a short, engaging description for a modern LED ceiling light from ZZ LIGHTING COMPANY.")
-print(response.text)
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-# Add your YouTube upload logic below this line if needed
+    - name: Run YouTube Upload Script
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        python upload.py
