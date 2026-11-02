@@ -1,3 +1,4 @@
+
 import os
 from openai import OpenAI
 
@@ -30,4 +31,3 @@ def run_automation():
 
 if __name__ == '__main__':
     run_automation()
-    
