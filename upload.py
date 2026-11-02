@@ -1,22 +1,18 @@
-import os
 
+
+import os
 import google.generativeai as genai
 
+# Configure Gemini API key
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
-def run_automation():
-    try:
-        print("Generating script using Gemini...")
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content("Write a catchy YouTube Short title and 30-second script for ZZ LIGHTING COMPANY modern LED lights.")
-        print("\n--- Generated Script ---")
-        print(response.text)
-        print("------------------------\n")
-        print("Automation completed successfully!")
-    except Exception as e:
-        print(f"Error occurred: {e}")
-        exit(1)
+print("Generating script using Gemini...")
 
-if __name__ == "__main__":
-    run_automation()
+# Initialize the model
+model = genai.GenerativeModel('gemini-2.5-flash')
 
+# Generate content
+response = model.generate_content("Write a short, engaging description for a modern LED ceiling light from ZZ LIGHTING COMPANY.")
+print(response.text)
+
+# Add your YouTube upload logic below this line if needed
