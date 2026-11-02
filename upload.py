@@ -7,8 +7,8 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 print("Generating script using Gemini...")
 
-# Initialize the correct supported model
-model = genai.GenerativeModel('gemini-2.5-flash')
+# Initialize the model
+model = genai.GenerativeModel('gemini-3.8-flash')
 
 # Generate content
 response = model.generate_content("Write a short, engaging description for a modern LED ceiling light from ZZ LIGHTING COMPANY.")
