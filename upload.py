@@ -1,4 +1,3 @@
-
 import os
 import google.generativeai as genai
 from googleapiclient.discovery import build
@@ -109,5 +108,5 @@ if __name__ == "__main__":
     # ویڈیو بنانا
     video_file = create_video_from_script(script_text)
     
-    # یوٹیوب پر اپ لوڈ کرنا (جب آپ کے پاس گٹ ہب سیکریٹس میں ٹوکنز ایڈ ہوں)
-    # upload_to_youtube(video_file, "ZZ Lighting Company - Modern LED Lights", script_text)
+    # یوٹیوب پر خودکار اپ لوڈ کرنا
+    upload_to_youtube(video_file, "ZZ Lighting Company - Modern LED Lights", script_text)
