@@ -1,8 +1,11 @@
+
 import os
 import google.generativeai as genai
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from google.oauth2.credentials import Credentials
+from PIL import Image, ImageDraw, ImageFont
+import subprocess
 
 # 1. Gemini API سیٹ اپ
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -11,7 +14,6 @@ genai.configure(api_key=GEMINI_API_KEY)
 def generate_lighting_script():
     prompt = "Write a short, engaging YouTube description and script about modern LED ceiling lights for ZZ LIGHTING COMPANY."
     
-    # یہاں ہم خودکار طریقے سے چیک کرتے ہیں کہ کون سا ماڈل دستیاب ہے
     for m in genai.list_models():
         if 'generateContent' in m.supported_generation_methods:
             try:
@@ -22,12 +24,41 @@ def generate_lighting_script():
             except Exception:
                 continue
                 
-    # اگر اوپر والا لوپ نہ چلے تو یہ فکسڈ ماڈل استعمال ہوگا
     model = genai.GenerativeModel("models/gemini-1.5-flash")
     response = model.generate_content(prompt)
     return response.text
 
-# 2. YouTube Upload سیٹ اپ
+# 2. اسکرپٹ سے خودکار ویڈیو (MP4) بنانے کا فنکشن
+def create_video_from_script(script_text):
+    print("Creating video from script...")
+    
+    # ایک سادہ تصویر بنانا جس پر زیڈ زی लाइٹنگ لکھا ہو
+    img = Image.new('RGB', (1080, 1920), color=(15, 15, 30))
+    d = ImageDraw.Draw(img)
+    
+    # ٹیکسٹ کو تصاویر پر سیٹ کرنا (پہلے چند جملے)
+    lines = script_text.split('\n')
+    text_to_show = "\n".join([line for line in lines if line.strip()][:5])
+    
+    d.text((50, 200), "ZZ LIGHTING COMPANY", fill=(255, 215, 0))
+    d.text((50, 400), text_to_show, fill=(255, 255, 255))
+    
+    image_path = "temp_slide.png"
+    img.save(image_path)
+    
+    # تصویر کو ویڈیو میں بدلنے کے لیے کمانڈ (FFmpeg کے ذریعے)
+    video_path = "output_video.mp4"
+    cmd = [
+        "ffmpeg", "-loop", "1", "-i", image_path, 
+        "-t", "10", "-pix_fmt", "yuv420p", 
+        "-vf", "scale=1080:1920", video_path, "-y"
+    ]
+    
+    subprocess.run(cmd, check=True)
+    print("Video created successfully:", video_path)
+    return video_path
+
+# 3. YouTube Upload سیٹ اپ
 def upload_to_youtube(video_file_path, title, description):
     client_id = os.getenv("YOUTUBE_CLIENT_ID")
     client_secret = os.getenv("YOUTUBE_CLIENT_SECRET")
@@ -74,3 +105,9 @@ if __name__ == "__main__":
     print("Generating script with Gemini...")
     script_text = generate_lighting_script()
     print("Generated Script:\n", script_text)
+    
+    # ویڈیو بنانا
+    video_file = create_video_from_script(script_text)
+    
+    # یوٹیوب پر اپ لوڈ کرنا (جب آپ کے پاس گٹ ہب سیکریٹس میں ٹوکنز ایڈ ہوں)
+    # upload_to_youtube(video_file, "ZZ Lighting Company - Modern LED Lights", script_text)
