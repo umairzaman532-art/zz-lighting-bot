@@ -1,5 +1,5 @@
 
-import 
+        import os
 import openai
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
@@ -31,4 +31,3 @@ def run_automation():
 
 if __name__ == '__main__':
     run_automation()
-  
