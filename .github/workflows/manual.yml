@@ -1,11 +1,10 @@
-
 name: ZZ Lighting Auto Bot
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 8 * * *'   # پاکستانی وقت کے مطابق روزانہ دوپہر 1:00 بجے
-    - cron: '0 14 * * *'  # پاکستانی وقت کے مطابق روزانہ شام 7:00 بجے
+    - cron: '0 8 * * *'  # پاکستانی وقت کے مطابق روزانہ دوپہر 1:00 بجے
+    - cron: '0 14 * * *' # پاکستانی وقت کے مطابق روزانہ شام 7:00 بجے
 
 jobs:
   upload-video:
@@ -22,11 +21,17 @@ jobs:
 
     - name: Install dependencies
       run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install google-generativeai google-api-python-client google-auth-oauthlib google-auth-httplib2 Pillow
 
     - name: Run YouTube Upload Script
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+        YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+        YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
       run: |
         python upload.py
+
