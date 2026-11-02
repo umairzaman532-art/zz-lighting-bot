@@ -11,17 +11,21 @@ genai.configure(api_key=GEMINI_API_KEY)
 def generate_lighting_script():
     prompt = "Write a short, engaging YouTube description and script about modern LED ceiling lights for ZZ LIGHTING COMPANY."
     
-    # یہاں ہم ماڈل کا نام رکھنے کے بجائے دستیاب ماڈلز میں سے خود بخود صحیح ماڈل اٹھانے کا کوڈ لگاتے ہیں
-    model_name = "gemini-1.5-flash-latest"
-    try:
-        model = genai.GenerativeModel(model_name)
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        print(f"Error with flash-latest, trying gemini-pro... {e}")
-        model = genai.GenerativeModel("gemini-pro")
-        response = model.generate_content(prompt)
-        return response.text
+    # یہاں ہم خودکار طریقے سے چیک کرتے ہیں کہ کون سا ماڈل دستیاب ہے
+    for m in genai.list_models():
+        if 'generateContent' in m.supported_generation_methods:
+            try:
+                model = genai.GenerativeModel(m.name)
+                response = model.generate_content(prompt)
+                if response and response.text:
+                    return response.text
+            except Exception:
+                continue
+                
+    # اگر اوپر والا لوپ نہ چلے تو یہ فکسڈ ماڈل استعمال ہوگا
+    model = genai.GenerativeModel("models/gemini-1.5-flash")
+    response = model.generate_content(prompt)
+    return response.text
 
 # 2. YouTube Upload سیٹ اپ
 def upload_to_youtube(video_file_path, title, description):
